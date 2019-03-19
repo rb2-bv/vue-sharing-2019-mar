@@ -1,0 +1,43 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <demo id="1"></demo>
+  <demo id="2"></demo>
+</div>
+
+<script>
+const withTodo = InnerComp => ({
+  props: ['id'],
+  data() {
+    return {
+      data: null
+    }
+  },
+  mounted() {
+    fetch(`https://jsonplaceholder.typicode.com/todos/${this.id}`).then(res => {
+      return res.json()
+    }).then(data => {
+      this.data = JSON.stringify(data, null, 2)
+    })
+  },
+  render(h) {
+    return h(InnerComp, {
+      props: {
+        data: this.data
+      }
+    })
+  }
+})
+
+const Demo = withTodo({
+  props: ['data'],
+  template: `<pre>{{ data }}</pre>`
+})
+
+const app = new Vue({
+  el: '#app',
+  components: {
+    Demo
+  }
+})
+</script>

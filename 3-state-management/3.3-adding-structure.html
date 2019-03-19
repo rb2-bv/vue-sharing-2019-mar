@@ -1,0 +1,49 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <counter></counter>
+  <counter></counter>
+  <counter></counter>
+  <button @click="inc">increment</button>
+</div>
+
+<script>
+// here we are creating an API that looks very simialr to Vuex.
+// this is to demonstrate that Vuex is in fact a thin convention
+// layer on top of Vue's reactivity system, mostly to enforce structure
+// in larger projects for better maintainability in the long run.
+
+function createStore({ state, mutations }) {
+  return {
+    state: Vue.observable(state),
+    commit(key, ...args) {
+      mutations[key](state, ...args)
+    }
+  }
+}
+
+const store = createStore({
+  state: { count: 0 },
+  mutations: {
+    inc (state) {
+      state.count++
+    }
+  }
+})
+
+const Counter = {
+  render (h) {
+    return h('div', store.state.count)
+  }
+}
+
+new Vue({
+  el: '#app',
+  components: { Counter },
+  methods: {
+    inc () {
+      store.commit('inc')
+    }
+  }
+})
+</script>

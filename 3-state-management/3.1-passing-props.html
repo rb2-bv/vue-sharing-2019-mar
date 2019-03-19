@@ -1,0 +1,27 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <counter :count="count"></counter>
+  <counter :count="count"></counter>
+  <counter :count="count"></counter>
+  <button @click="count++">increment</button>
+</div>
+
+<script>
+// multiple child components sharing state from common parent
+
+const Counter = {
+  props: ['count'],
+  template: `<div>{{ count }}</div>`
+}
+
+new Vue({
+  el: '#app',
+  data: {
+    count: 0
+  },
+  components: {
+    Counter
+  }
+})
+</script>

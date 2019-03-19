@@ -1,0 +1,57 @@
+<script src="https://unpkg.com/vue"></script>
+
+<script>
+// examples on alternative API designs for consuming injected store state in
+// components.
+
+// decorators
+// @useState(['count'])
+// export default {
+//   props: ['count'],
+//   template: `<div>{{ count }}</div>`
+// }
+</script>
+
+<div id="app">
+  <use-store v-slot="{ state: { count }, commit }">
+    <div>
+      {{ count }}
+      <button @click="commit('inc')">increment</button>
+    </div>
+  </use-store>
+</div>
+
+<!-- scoped slot component -->
+<script>
+function createStore({ state, mutations }) {
+  return {
+    state: Vue.observable(state),
+    commit(key, ...args) {
+      mutations[key](state, ...args)
+    }
+  }
+}
+
+const store = createStore({
+  state: { count: 0 },
+  mutations: {
+    inc (state) {
+      state.count++
+    }
+  }
+})
+
+const UseStore = {
+  render() {
+    const slotFn = this.$scopedSlots.default
+    if (slotFn) {
+      return slotFn(store)[0]
+    }
+  }
+}
+
+new Vue({
+  el: '#app',
+  components: { UseStore }
+})
+</script>

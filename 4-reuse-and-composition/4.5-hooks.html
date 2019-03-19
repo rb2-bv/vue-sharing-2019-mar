@@ -1,0 +1,72 @@
+<p>Make sure to open this page over an HTTP server.</p>
+<p>vue-hooks repo: https://github.com/yyx990803/vue-hooks</p>
+
+<div id="app">
+  <fetch-todo id="1"></fetch-todo>
+  <fetch-todo id="2"></fetch-todo>
+</div>
+
+<script src="https://unpkg.com/vue"></script>
+<script type="module">
+import { withHooks, useState, useEffect } from 'https://unpkg.com/vue-hooks'
+
+// a custom hook that fetches from an API endpoint
+function useAPI(endpoint) {
+  const [res, setRes] = useState({
+    status: 'pending',
+    data: null,
+    error: null
+  })
+  useEffect(() => {
+    let aborted = false
+    setRes({
+      status: 'pending',
+      data: null,
+      error: null
+    })
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => {
+        if (aborted) {
+          return
+        }
+        setRes({
+          status: 'success',
+          data,
+          error: null
+        })
+      }).catch(error => {
+        if (aborted) {
+          return
+        }
+        setRes({
+          status: 'error',
+          data: null,
+          error
+        })
+      })
+    return () => {
+      aborted = true
+    }
+  }, [endpoint])
+  return res
+}
+
+const FetchTodo = withHooks((h, props) => {
+  const { status, data, error } = useAPI(`https://jsonplaceholder.typicode.com/todos/${props.id}`)
+  let result
+  if (status === 'pending') {
+    result = h('div', 'loading...')
+  } else if (status === 'success') {
+    result = h('pre', JSON.stringify(data))
+  } else {
+    result = h('pre', { style: { color: 'red' }}, error.toString())
+  }
+  return result
+})
+
+new Vue({
+  el: '#app',
+  components: { FetchTodo }
+})
+</script>

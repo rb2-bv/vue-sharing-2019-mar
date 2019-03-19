@@ -1,0 +1,55 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <fetch-todo id="1"></fetch-todo>
+  <fetch-todo id="2"></fetch-todo>
+</div>
+
+<script>
+const Fetch = {
+  props: ['id'],
+  data() {
+    return {
+      data: null,
+      status: 'pending',
+      error: null
+    }
+  },
+  mounted() {
+    fetch(`https://jsonplaceholder.typicode.com/todos/${this.id}`).then(res => {
+      return res.json()
+    }).then(data => {
+      this.status = 'done'
+      this.data = JSON.stringify(data, null, 2)
+    }).catch(err => {
+      this.status = 'error'
+      this.error = err
+    })
+  },
+  render(h) {
+    const slotFn = this.$scopedSlots.default
+    if (slotFn) {
+      return slotFn(this.$data)
+    }
+  }
+}
+
+const FetchTodo = {
+  props: ['id'],
+  components: { Fetch },
+  template: `
+    <fetch :id="id" v-slot="{ status, data, error }">
+      <pre v-if="status === 'done'">{{ data }}</pre>
+      <div v-else="status === 'pending'">loading...</div>
+      <div v-else>{{ error }}</div>
+    </fetch>
+  `
+}
+
+const app = new Vue({
+  el: '#app',
+  components: {
+    FetchTodo
+  }
+})
+</script>

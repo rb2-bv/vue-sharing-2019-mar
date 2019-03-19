@@ -1,0 +1,47 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <demo id="1"></demo>
+  <demo id="2"></demo>
+</div>
+
+<script>
+const Plugin = Vue => {
+  Vue.mixin({
+    mounted() {
+      if (this.$options.fetch != null) {
+        this.$options.fetch(this.$props).forEach(({ endpoint, key }) => {
+          fetch(endpoint).then(res => {
+            return res.json()
+          }).then(data => {
+            this[key] = JSON.stringify(data, null, 2)
+          })
+        })
+      }
+    }
+  })
+}
+
+Vue.use(Plugin)
+
+const Demo = {
+  template: `<pre>{{ todo1 }}</pre>`,
+  props: ['id'],
+  data() {
+    return {
+      todo1: null
+    }
+  },
+  fetch: (props) => [
+    {
+      endpoint: `https://jsonplaceholder.typicode.com/todos/${props.id}`,
+      key: 'todo1'
+    }
+  ]
+}
+
+const app = new Vue({
+  el: '#app',
+  components: { Demo }
+})
+</script>

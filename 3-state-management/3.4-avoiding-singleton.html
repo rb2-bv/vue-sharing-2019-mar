@@ -1,0 +1,54 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <counter></counter>
+  <counter></counter>
+  <counter></counter>
+  <button @click="inc">increment</button>
+</div>
+
+<script>
+// Avoid singletons with dependency injection
+// - Easier to mock in tests
+// - Works with SSR
+
+function createStore({ state, mutations }) {
+  return {
+    state: Vue.observable(state),
+    commit(key, ...args) {
+      mutations[key](state, ...args)
+    }
+  }
+}
+
+const store = createStore({
+  state: { count: 0 },
+  mutations: {
+    inc (state) {
+      state.count++
+    }
+  }
+})
+
+const Counter = {
+  // inject
+  inject: ['store'],
+  render (h) {
+    return h('div', this.store.state.count)
+  }
+}
+
+new Vue({
+  el: '#app',
+  components: { Counter },
+  // provide
+  provide: {
+    store
+  },
+  methods: {
+    inc () {
+      store.commit('inc')
+    }
+  }
+})
+</script>

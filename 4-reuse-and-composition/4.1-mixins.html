@@ -1,0 +1,31 @@
+<script src="https://unpkg.com/vue"></script>
+
+<div id="app">
+  <pre>{{ todo1 }}</pre>
+  <pre>{{ todo2 }}</pre>
+</div>
+
+<script>
+const dataMixin = (key, id) => ({
+  data() {
+    return {
+      [key]: null
+    }
+  },
+  mounted() {
+    fetch(`https://jsonplaceholder.typicode.com/todos/${id}`).then(res => {
+      return res.json()
+    }).then(data => {
+      this[key] = JSON.stringify(data, null, 2)
+    })
+  }
+})
+
+const app = new Vue({
+  el: '#app',
+  mixins: [
+    dataMixin('todo1', 1),
+    dataMixin('todo2', 2)
+  ]
+})
+</script>
